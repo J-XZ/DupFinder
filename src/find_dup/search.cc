@@ -313,7 +313,7 @@ void DuplicateFinder::process(nlohmann::json &output) {
   std::stack<std::filesystem::path> s;
   s.push(search_dir_);
 
-  std::map<uint64_t, std::vector<MyFile>> all_files;
+  std::map<std::pair<uint64_t, uint64_t>, std::vector<MyFile>> all_files;
   {
     std::set<uint64_t> checked_inodes;
     while (!s.empty()) {
@@ -353,7 +353,10 @@ void DuplicateFinder::process(nlohmann::json &output) {
             }
             checked_inodes.insert(inode);
 
-            all_files[f.little_hash()].push_back(f);
+            auto little_hash = f.little_hash();
+            auto size = f.size_;
+
+            all_files[std::make_pair(little_hash, size)].push_back(f);
           }
         }
       } catch (const std::filesystem::filesystem_error &) {
